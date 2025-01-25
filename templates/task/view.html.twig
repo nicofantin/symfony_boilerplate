@@ -27,7 +27,7 @@
     </tr>
     <tr>
         <th>Mis à jour le</th>
-        <td>{{ task.updateAt ? task.updateAt|date('d/m/Y H:i') : 'N/A' }}</td>
+        <td>{{ task.updatedAt ? task.updatedAt|date('d/m/Y H:i') : 'N/A' }}</td>
     </tr>
 </table>
 <a href="{{ path('task_edit', {'id': task.id}) }}" class="btn btn-warning">Modifier</a>

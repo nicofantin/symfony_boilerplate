@@ -9,6 +9,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+
 class TaskType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -16,17 +18,20 @@ class TaskType extends AbstractType
         $builder
             ->add('name')
             ->add('description')
-            ->add('createdAt', null, [
+            ->add('createdAt', DateType::class, [ // Utilisation explicite de DateType
                 'widget' => 'single_text',
+                'label' => 'Date de création',
+                'html5' => true,
             ])
-            ->add('updateAt', null, [
+            ->add('updatedAt', DateType::class, [ // Utilisation explicite de DateType
                 'widget' => 'single_text',
+                'label' => 'Date de mise à jour',
+                'html5' => true,
             ])
             ->add('author', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'email',
-            ])
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\TaskService;
 
 #[Route('/tasks')]
 class TaskController extends AbstractController
@@ -64,11 +65,21 @@ class TaskController extends AbstractController
     
 
     #[Route('/edit/{id}', name: 'task_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Task $task, EntityManagerInterface $entityManager): Response
-    {
+    public function edit(
+        Request $request,
+        Task $task,
+        EntityManagerInterface $entityManager,
+        TaskService $taskService // Injection du service
+    ): Response {
         // Vérification des permissions
         if (!$this->isGranted('TASK_EDIT', $task)) {
             $this->addFlash('error', 'Vous n\'avez pas l\'autorisation de modifier cette tâche.');
+            return $this->redirectToRoute('task_index');
+        }
+    
+        // Vérification de la possibilité de modifier la tâche en fonction de la date de création
+        if (!$taskService->canEdit($task)) {
+            $this->addFlash('error', 'La tâche ne peut pas être modifiée car elle a été créée il y a plus de 7 jours.');
             return $this->redirectToRoute('task_index');
         }
     
@@ -77,7 +88,7 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
-            $task->setUpdateAt(new \DateTimeImmutable());
+            $task->setUpdatedAt(new \DateTimeImmutable());
             $entityManager->flush();
     
             $this->addFlash('success', 'Tâche modifiée avec succès.');
@@ -89,6 +100,7 @@ class TaskController extends AbstractController
             'task' => $task,
         ]);
     }
+    
     
 
     #[Route('/delete/{id}', name: 'task_delete', methods: ['POST'])]
